@@ -1,0 +1,315 @@
+"A date string with format `Y-m-d`, e.g. `2011-05-23`."
+scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
+
+"A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
+scalar DateTime
+    @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+"A datetime and timezone string in ISO 8601 format `Y-m-dTH:i:sO`, e.g. `2020-04-20T13:53:12+02:00`."
+scalar DateTimeTz
+    @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTimeTz")
+
+"Can be used as an argument to upload files using https://github.com/jaydenseric/graphql-multipart-request-spec"
+scalar Upload
+    @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Upload")
+
+type Users {
+    uid: ID!
+    name: String!
+    email: String!
+    phone: String
+    avatar_src: String
+    travel_count: Int
+    is_admin: Boolean
+    admin_level: Int
+    last_login: DateTime
+    created_at: DateTime!
+    updated_at: DateTime!
+    message: String
+    scenic: [Scenic] @hasMany
+    introduction: [Introduction] @hasMany
+    Travels: [Travels] @hasMany
+}
+
+type Scenic {
+    sid: ID!
+    name: String!
+    main_img: String!
+    is_hot: Boolean
+    play_time: Int
+    recommend_time_s: Int
+    recommend_time_e: Int
+    describe: String!
+    proposal: String!
+    img_list: [Scenic_Img_List] @hasMany
+    users: Users @belongsTo
+    users_uid: ID!
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Introduction {
+    iid: ID!
+    main_img: String!
+    name: String!
+    name_en: String
+    country: String
+    author: String
+    describe: String
+    is_hot: Boolean
+    file_src: String
+    file_name: String
+    users_uid: ID!
+    users: Users @belongsTo
+    author: String
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Travels {
+    tid: ID!
+    name: String!
+    main_img: String!
+    play_time: Int
+    start_date: DateTime
+    city: String!
+    channel: String!
+    trip: String!
+    detail: String!
+    img_list: [TravelsImg] @hasMany
+    users: Users @belongsTo
+    users_uid: ID!
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type TravelsImg {
+    img_id: ID!
+    travels_tid: ID!
+    img_src: String!
+    travels: Travels @belongsTo
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Scenic_Img_List {
+    img_id: ID!
+    scenic_sid: ID!
+    img_src: String!
+    scenic: Scenic @belongsTo
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type PublicImgList {
+    img_id: ID!
+    img_src: String!
+    name: String
+    extension: String
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+input UpdateUserInfoInput {
+    uid: ID!
+    name: String @rules(apply: ["max:8", "min:2"])
+    email: String @rules(apply: ["email", "unique:users,email"])
+    phone: String @rules(apply: ["unique:users,phone", "max:11", "min:6"])
+    avatar_src: String
+    travel_count: String @rules(apply: ["Numeric"])
+    is_admin: Boolean
+    admin_level: Int @rules(apply: ["Numeric", "max:6", "min:0"])
+    last_login: DateTime
+    updated_at: DateTime
+}
+
+input CreateSceincInput {
+    name: String! @rules(apply: ["required", "unique:scenic,name"])
+    main_img: String
+    is_hot: Boolean
+    play_time: Int @rules(apply: ["Numeric", "max:100", "min:0"])
+    recommend_time_s: Int @rules(apply: ["Numeric", "max:12", "min:1"])
+    recommend_time_e: Int @rules(apply: ["Numeric", "max:12", "min:1"])
+    describe: String
+    proposal: String
+    img_list: [Scenic_Img_List] @hasMany
+    users_uid: ID!
+}
+
+input CreateIntroductionInput {
+    main_img: String
+    name: String! @rules(apply: ["required", "unique:introduction,name"])
+    name_en: String @rules(apply: ["required", "unique:introduction,name_en"])
+    country: String
+    describe: String
+    is_hot: Boolean
+    users_uid: ID!
+    author: String
+}
+
+input UpdateSceincInput {
+    name: String @rules(apply: ["unique:scenic,name"])
+    main_img: String
+    is_hot: Boolean
+    play_time: Int @rules(apply: ["Numeric", "max:100", "min:0"])
+    recommend_time_s: Int @rules(apply: ["Numeric", "max:12", "min:1"])
+    recommend_time_e: Int @rules(apply: ["Numeric", "max:12", "min:1"])
+    describe: String
+    proposal: String
+    img_list: [Scenic_Img_List] @hasMany
+}
+
+input CreateTravelInput {
+    name: String! @rules(apply: ["unique:travels,name"])
+    main_img: String
+    play_time: Int @rules(apply: ["Numeric", "max:100", "min:0"])
+    start_date: String
+    city: String!
+    channel: String!
+    trip: String!
+    detail: String!
+    users_uid: ID!
+}
+
+# input CreateTravelInput {
+#     name: String!
+#     users_uid: ID!
+# }
+
+type UpdateUserInfoResponse {
+    user: Users
+    message: String
+}
+
+type Query {
+    users: [Users!]! @paginate @CheckAdmin(with: "Admin") @guard(with: ["api"])
+    userCount: Int @count(model: "Users")
+    user(uid: ID @eq): Users @find
+    me: Users @middleware(checks: ["auth:api"]) @auth
+
+    # 景点查询
+    scenics: [Scenic] @all
+    Scenicp: [Scenic!]! @paginate
+    scenic(sid: ID! @eq): Scenic @find
+    scenicCount: Int @count(model: "Scenic")
+    scenicsByHot(is_hot: Boolean! @eq): [Scenic] @find
+    scenicsComplexQuery(search: String!): [Scenic]
+        @field(resolver: "App\\GraphQL\\Queries\\ScenicComplexQuery")
+
+    # 攻略查询
+    introductions: [Introduction] @all
+    introductionp: [Introduction!]! @paginate
+    introduction(iid: ID! @eq): Introduction @find
+    introductionCount: Int @count(model: "Introduction")
+
+    # 游记查询
+    travels: [Travels] @all
+    travelp: [Travels!]! @paginate
+    travel(tid: ID! @eq): Travels @find
+    travelCount: Int @count(model: "Travels")
+
+    # 全局图片查询
+    PublicImgs: [PublicImgList] @all
+    PublicImg(img_id: ID! @eq): PublicImgList @find
+    PublicImgByType(type: String! @eq): [PublicImgList] @all
+}
+type FileInfoResponse {
+    webPath: [String!]!
+}
+
+type Mutation {
+    # 用户操作
+    updateUserInfo(input: UpdateUserInfoInput @spread): Users!
+        @CheckAdmin(with: "Admin")
+        @guard(with: ["api"])
+        @update
+    resetPassword(uid: ID! @eq, password: String = "12345678" @bcrypt): Users
+        @CheckAdmin(with: "SuperAdmin")
+        @guard(with: ["api"])
+        @update
+    deleteUser(uid: ID! @eq): Users
+        @CheckAdmin(with: "SuperAdmin")
+        @guard(with: ["api"])
+        @delete
+    ChangeAdmin(
+        uid: ID! @eq
+        is_admin: Boolean = false
+        admin_level: Int = 0
+    ): Users @CheckAdmin(with: "SuperAdmin") @guard(with: ["api"]) @update
+    ChangeAvator(uid: ID! @eq, file: Upload!): String
+        @CheckAdmin(with: "Self")
+        @guard(with: ["api"])
+        @field(resolver: "App\\GraphQL\\Mutations\\ChangeAvator")
+
+    # 景点操作
+    createScenic(input: CreateSceincInput! @spread): Scenic
+        @CheckAdmin(with: "Admin")
+        @guard(with: ["api"])
+        @create
+    updateScenic(input: UpdateSceincInput! @spread, sid: ID!): Scenic
+        @guard(with: ["api"])
+        @CheckAdmin(with: "Admin")
+        @update
+    deleteScenic(sid: ID! @eq): Scenic
+        @CheckAdmin(with: "Admin")
+        @guard(with: ["api"])
+        @delete
+    uploadScenicFile(sid: ID!, files: [Upload!]!): [String]
+        @CheckAdmin(with: "Admin")
+        @guard(with: ["api"])
+        @field(resolver: "App\\GraphQL\\Mutations\\UploadScenicFile")
+
+    # 攻略操作
+    createIntroduction(input: CreateIntroductionInput! @spread): Introduction
+        @CheckAdmin(with: "Admin")
+        @guard(with: ["api"])
+        @create
+
+    deleteIntroduction(iid: ID! @eq): Introduction
+        @CheckAdmin(with: "Admin")
+        @guard(with: ["api"])
+        @delete
+
+    downloadIntroduction(iid: ID! @eq): String
+        @guard(with: ["api"])
+        @field(resolver: "App\\GraphQL\\Mutations\\DownloadIntroduction")
+
+    introductionFileUpload(iid: ID! @eq, file: Upload!): String
+        @CheckAdmin(with: "Admin")
+        @guard(with: ["api"])
+        @field(resolver: "App\\GraphQL\\Mutations\\IntroductionFileUpload")
+
+    # 游记
+    createTravel(input: CreateTravelInput! @spread): Travels
+        @guard(with: ["api"])
+        @create
+
+    deleteTravel(iid: ID! @eq): Travels
+        @CheckAdmin(with: "Admin")
+        @guard(with: ["api"])
+        @delete
+
+    uploadTravelFile(sid: ID!, files: [Upload!]!): [String]
+        @CheckAdmin(with: "Admin")
+        @guard(with: ["api"])
+        @field(resolver: "App\\GraphQL\\Mutations\\UploadTravelFile")
+
+    # 全局图片操作
+    createGlobalImg(file: Upload!, type: String): PublicImgList
+        @CheckAdmin(with: "Admin")
+        @guard(with: ["api"])
+        @field(resolver: "App\\GraphQL\\Mutations\\CreateGlobalImg")
+
+    deleteGlobalImg(imgId: ID!): Boolean
+        @CheckAdmin(with: "Admin")
+        @guard(with: ["api"])
+        @field(resolver: "App\\GraphQL\\Mutations\\DeleteGlobalImg")
+
+    # 公共操作
+    uploadFile(files: [Upload!]!, type: String): [String]
+        @field(resolver: "App\\GraphQL\\Mutations\\SaveFile")
+    deleteFile(filesrc: [String!]!): Boolean
+        @field(resolver: "App\\GraphQL\\Mutations\\DeleteFile")
+    downloadFile(filesrc: String!, filename: String): String
+        @field(resolver: "App\\GraphQL\\Mutations\\DownloadFile")
+}
