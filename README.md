@@ -1,79 +1,85 @@
-<p align="center"><img src="https://res.cloudinary.com/dtfbvvkyp/image/upload/v1566331377/laravel-logolockup-cmyk-red.svg" width="400"></p>
+#该部分为网站后端，前端链接：https://github.com/ShadowYIG/TravelsFrontend
+# WEB旅游推荐网站说明
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
 
-## About Laravel
+| CreateTime： | 2020-7-23 |
+| ------------ | --------- |
+| author:      | ShadowY   |
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 网站架构
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+* 前端：Vue.js+Vue Router+Vuex
+* 前端打包：webpack
+* 后端：laravel
+* 前后端交互：GraphQL+Vue Apollo
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 所需环境
 
-## Learning Laravel
+* 前端
+    node: >= 6.0.0
+    npm: >= 3.0.0
+* 后端
+    php7
+    mysql>= 5.7.*
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 配置方式
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 方式一：无需修改源码
 
-## Laravel Sponsors
+默认前端请求后端的链接为127.0.0.8:9910，建议将后端php环境的host设置为此地址无需修改代码文件
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+### 方式二：需要修改源代码
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- [UserInsights](https://userinsights.com)
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
-- [iMi digital](https://www.imi-digital.de/)
-- [Earthlink](https://www.earthlink.ro/)
-- [Steadfast Collective](https://steadfastcollective.com/)
-- [We Are The Robots Inc.](https://watr.mx/)
-- [Understand.io](https://www.understand.io/)
-- [Abdel Elrafa](https://abdelelrafa.com)
-- [Hyper Host](https://hyper.host)
-- [Appoly](https://www.appoly.co.uk)
-- [OP.GG](https://op.gg)
-- [云软科技](http://www.yunruan.ltd/)
+前端文件中TravelsFrontend/src/vue-apollo.js 第16行修改为   
+你的地址/graphql
 
-## Contributing
+前端文件中TravelsFrontend/api/global_variable.js 第2行修改为
+你的地址（注意后面保留斜杠）
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 构建方式
 
-## Code of Conduct
+### 开发者模式：
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+前端目录下运行终端命令
+npm run dev
 
-## Security Vulnerabilities
+### 生产模式：
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+前端目录下运行终端命令
+npm run build
 
-## License
+### 如何运行
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+#### 前端：
+
+先构建后运行
+
+#### 后端：
+
+后端将网站根目录设置到TravelsServer/public下
+修改TravelsServer/.env文件9-14行的数据库配置
+
+## 项目结构
+
+TravelsFrontend为前端文件夹
+		 build文件夹为我编译构建后的前端文件，内部index可直接运行
+		 api文件夹下global_variable.js为全局变量
+		 components文件夹为组件文件，里面是每个页面的每一小块
+		 views为页面
+TravelsServer为后端文件夹
+		 graphql为查询和操作的设置文件
+		 app/GraphQL为graphql执行与处理文件
+		 app根目录下的php为数据库设置文件
+		 database文件夹下所有文件为数据库设置文件
+数据库
+		 downloadfile表：下载临时链接的存储
+		 introduction表：攻略数据
+		 scenic表：景点数据
+		 travels表：游记数据
+		 users表：用户数据
+		 travel_imgs:游记图片
+		 public_img_lists:全局图片
+		 scenic_img_lists:景点突破
+		 migrations表：php数据库迁移记录文件
+		 oauth前缀均用于登陆注册管理等的token存储
+
